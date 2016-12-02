@@ -1,0 +1,27 @@
+FROM php:7-apache
+
+COPY /conf/ports.conf /etc/apache2/ports.conf
+COPY /conf/laravel.conf /etc/apache2/sites-enabled/000-default.conf
+COPY /conf/key.json /app/key.json
+RUN curl -sS https://getcomposer.org/installer | php
+RUN mv composer.phar /usr/local/bin/composer
+RUN mkdir -p  /app/AccessLog.local && chmod 777 /app/AccessLog.local
+RUN mkdir -p /app/laravel5.3 && chmod 777 /app/laravel5.3
+RUN docker-php-ext-install pdo_mysql mbstring
+
+
+ADD app/ /app/laravel5.3
+RUN apt-get update
+RUN apt-get install -y vim git zip unzip mysql-client wget
+
+RUN wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
+RUN mv cloud_sql_proxy.linux.amd64 cloud_sql_proxy
+RUN chmod +x cloud_sql_proxy
+RUN ./cloud_sql_proxy -dir=/cloudsql -instances=laravel53-test:us-central1:voyager  -credential_file=/app/key.json &
+
+WORKDIR /app/laravel5.3
+RUN chmod -R 777 storage && chmod -R 777 bootstrap/cache
+RUN composer require tcg/voyager
+RUN composer update
+RUN php artisan voyager:install
+EXPOSE 8080

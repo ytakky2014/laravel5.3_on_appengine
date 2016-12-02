@@ -64,6 +64,7 @@ return [
             'prefix' => '',
             'strict' => true,
             'engine' => null,
+            'unix_socket' => "/cloudsql/laravel53-test:us-central1:voyager"
         ],
 
         'pgsql' => [

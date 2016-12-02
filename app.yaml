@@ -1,2 +1,4 @@
 runtime: custom
 vm: true
+beta_settings:
+    cloud_sql_instances: "laravel53-test:us-central1:voyager"
